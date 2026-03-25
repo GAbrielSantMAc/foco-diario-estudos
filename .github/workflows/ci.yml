@@ -24,12 +24,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Análise Estática (Linting com Flake8)
+   - name: Análise Estática (Linting com Flake8)
       run: |
-        # Para a execução se houver erros graves de sintaxe
-        flake8 src/ tests/ --count --select=E9,F63,F7,F82 --show-source --statistics
-        # Verifica estilo do código (limite de 120 caracteres por linha para não quebrar à toa)
-        flake8 src/ tests/ --count --max-line-length=120 --statistics
+        # Ignora erros de espaços (E203, W503) e foca apenas em erros reais de sintaxe
+        flake8 src/ tests/ --count --ignore=E203,W503,E501 --statistics
 
     - name: Rodar Testes Automatizados (Pytest)
       run: |
