@@ -34,9 +34,3 @@ O **Foco Diário** é uma aplicação simples de Linha de Comando (CLI) que atua
 
 ---
 
-## 🚀 Como Instalar e Executar
-
-**1. Clone este repositório:**
-```bash
-git clone [https://github.com/SEU_USUARIO/foco-diario-estudos.git](https://github.com/GAbrielSantMAc/foco-diario-estudos.git)
-cd foco-diario-estudos
