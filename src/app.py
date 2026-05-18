@@ -41,14 +41,13 @@ def iniciar_cli():
     """Interface de Linha de Comando (CLI)."""
     tarefas = carregar_tarefas()
     
+    print(buscar_frase_motivacional())
     while True:
-        print(buscar_frase_motivacional())
         print("\n--- 🎯 FOCO DIÁRIO: Organizador de Estudos ---")
         print("1. Adicionar Tarefa de Estudo (Máx: 3)")
         print("2. Listar Tarefas")
         print("3. Concluir/Remover Tarefa")
         print("4. Sair")
-        
         escolha = input("Escolha uma opção: ")
         
         if escolha == '1':
