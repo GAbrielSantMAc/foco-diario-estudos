@@ -1,5 +1,6 @@
 import json
 import os
+from motivacao import buscar_frase_motivacional
 
 ARQUIVO_DADOS = 'tarefas.json'
 
@@ -41,6 +42,7 @@ def iniciar_cli():
     tarefas = carregar_tarefas()
     
     while True:
+        print(buscar_frase_motivacional())
         print("\n--- 🎯 FOCO DIÁRIO: Organizador de Estudos ---")
         print("1. Adicionar Tarefa de Estudo (Máx: 3)")
         print("2. Listar Tarefas")
