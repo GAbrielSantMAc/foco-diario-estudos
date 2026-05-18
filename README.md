@@ -1,4 +1,7 @@
-# 🎯 Foco Diário: Organizador de Estudos CLI
+## 🌐 Deploy
+Aplicação publicada: https://gabrielsantmac.github.io/foco-diario-estudos/
+
+---# 🎯 Foco Diário: Organizador de Estudos CLI
 
 **Versão Atual:** `1.0.0`
 
