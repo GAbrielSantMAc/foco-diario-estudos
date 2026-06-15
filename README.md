@@ -17,23 +17,27 @@ O **Foco Diário** é uma aplicação simples de Linha de Comando (CLI) que atua
 
 ---
 
-## ⚙️ Funcionalidades Principais
+## Tecnologias Utilizadas
 
-* **Adicionar Tarefa:** Insere uma nova meta de estudo (limitado a 3 ativas por vez).
-* **Listar Tarefas:** Mostra as tarefas focais do dia.
-* **Concluir/Remover Tarefa:** Remove a tarefa da lista após a conclusão.
-* **Persistência de Dados:** As tarefas são salvas automaticamente em um arquivo `tarefas.json`, garantindo que não se percam ao fechar o terminal.
+- Python 3.11
+- Requests
+- Pytest
+- Supabase
+- GitHub Actions
 
----
+## Banco de Dados
 
-## 🛠️ Tecnologias Utilizadas
+O projeto utiliza Supabase (PostgreSQL em nuvem) para armazenamento persistente das tarefas.
 
-* **Linguagem:** Python 3
-* **Interface:** CLI (Command Line Interface)
-* **Testes Automatizados:** `pytest`
-* **Análise Estática (Linting):** `flake8`
-* **CI/CD:** GitHub Actions (Pipeline automatizada configurada em `.github/workflows/ci.yml`)
-* **Dependências:** Declaradas no arquivo `requirements.txt`
+## Funcionalidades
 
----
+- Adicionar tarefas
+- Remover tarefas
+- Limite de 3 tarefas diárias
+- Frases motivacionais via API ZenQuotes
+- Persistência de dados em banco de dados Supabase
 
+## Qualidade
+
+- Testes automatizados com Pytest
+- Integração contínua com GitHub Actions
