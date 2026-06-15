@@ -18,3 +18,6 @@ def adicionar_tarefa_supabase(titulo):
         "titulo": titulo,
         "concluida": False
     }).execute()
+
+def remover_tarefa_supabase(id_tarefa):
+    supabase.table("tarefas").delete().eq("id", id_tarefa).execute()
