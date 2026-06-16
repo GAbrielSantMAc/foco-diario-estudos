@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Foco Diário</title>
+
     <style>
         :root {
             --bg-color: #0b132b;
@@ -37,10 +38,6 @@
         h1 {
             font-size: 2.5rem;
             margin-bottom: 25px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
         }
 
         .input-group {
@@ -51,211 +48,153 @@
 
         input {
             flex: 1;
-            padding: 12px 16px;
+            padding: 12px;
             border-radius: 8px;
-            border: 2px solid transparent;
-            font-size: 1rem;
-            background-color: var(--input-bg);
-            color: #333;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        input:focus {
-            border-color: var(--btn-green);
+            border: none;
         }
 
         button.btn-add {
             background-color: var(--btn-green);
             color: white;
             border: none;
-            padding: 12px 24px;
+            padding: 12px 20px;
             border-radius: 8px;
-            font-size: 1rem;
-            font-weight: bold;
             cursor: pointer;
-            transition: background 0.2s, transform 0.1s;
-        }
-
-        button.btn-add:hover {
-            background-color: var(--btn-green-hover);
-        }
-
-        button.btn-add:active {
-            transform: scale(0.98);
         }
 
         #feedback {
             margin-bottom: 15px;
             font-size: 0.9rem;
-            font-weight: 500;
             min-height: 20px;
         }
 
         .lista-tarefas {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
         }
 
         .tarefa-item {
             background-color: var(--card-color);
-            padding: 14px 18px;
+            padding: 12px;
             border-radius: 8px;
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .tarefa-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        }
-
-        .tarefa-texto {
-            font-size: 1.05rem;
         }
 
         .btn-delete {
-            background: transparent;
+            background: none;
             border: none;
-            font-size: 1.1rem;
+            color: red;
             cursor: pointer;
-            padding: 4px;
-            border-radius: 4px;
-            transition: background 0.2s;
-        }
-
-        .btn-delete:hover {
-            background-color: rgba(239, 68, 68, 0.2);
         }
 
         .estado-vazio {
             color: var(--text-muted);
-            font-style: italic;
-            margin-top: 20px;
         }
     </style>
 </head>
+
 <body>
 
-    <div class="container">
-        <h1>🔥 Foco Diário</h1>
+<div class="container">
+    <h1>🔥 Foco Diário</h1>
 
-        <!-- Input e Botão -->
-        <div class="input-group">
-            <input type="text" id="inputTarefa" placeholder="Digite sua tarefa..." autocomplete="off">
-            <button class="btn-add" id="btnAdicionar" onclick="adicionarTarefa()">Adicionar</button>
-        </div>
-
-        <!-- Feedback Visual das Ações -->
-        <div id="feedback"></div>
-
-        <!-- Container Dinâmico das Tarefas -->
-        <div class="lista-tarefas" id="listaTarefas">
-            <!-- As tarefas injetadas pelo JS entram aqui -->
-        </div>
+    <div class="input-group">
+        <input type="text" id="inputTarefa" placeholder="Digite sua tarefa...">
+        <button class="btn-add" onclick="adicionarTarefa()">Adicionar</button>
     </div>
 
-    <script>
-        // Carrega a lista assim que a página abre
-        document.addEventListener("DOMContentLoaded", carregarTarefas);
+    <div id="feedback"></div>
 
-        // [Item 4]: Ouvinte para enviar com a tecla ENTER
-        document.getElementById("inputTarefa").addEventListener("keypress", function(e) {
-            if (e.key === "Enter") {
-                adicionarTarefa();
-            }
-        });
+    <div class="lista-tarefas" id="listaTarefas"></div>
+</div>
 
-        // Função auxiliar para exibir avisos na tela [Item 3]
-        function mostrarFeedback(mensagem, tipo) {
-            const fb = document.getElementById("feedback");
-            fb.innerText = mensaje = mensagem;
-            fb.style.color = tipo === "sucesso" ? "#10b981" : "#ef4444";
-            
-            // Some após 3 segundos
-            setTimeout(() => { fb.innerText = ""; }, 3000);
-        }
+<script>
+document.addEventListener("DOMContentLoaded", carregarTarefas);
 
-        // GET: Buscar e renderizar tarefas
-        async function carregarTarefas() {
-            try {
-                const response = await fetch("/tarefas");
-                const tarefas = await response.json();
-                const lista = document.getElementById("listaTarefas");
-                
-                lista.innerHTML = "";
+document.getElementById("inputTarefa").addEventListener("keypress", function(e) {
+    if (e.key === "Enter") {
+        adicionarTarefa();
+    }
+});
 
-                // [Item 6]: Estado Vazio
-                if (tarefas.length === 0) {
-                    lista.innerHTML = `<div class="estado-vazio">Nenhuma tarefa cadastrada hoje. O foco está livre! ☕</div>`;
-                    return;
-                }
+// ✅ FUNÇÃO CORRIGIDA
+function mostrarFeedback(mensagem, tipo) {
+    const fb = document.getElementById("feedback");
+    fb.innerText = mensagem;
 
-                // Renderiza a lista combinando com a imagem image_5a1081.png, mas com o botão de deletar [Item 1, 7]
-                tarefas.forEach((tarefa, index) => {
-                    lista.innerHTML += `
-                        <div class="tarefa-item">
-                            <span class="tarefa-texto">${index} - ${tarefa}</span>
-                            <button class="btn-delete" onclick="deletarTarefa(${index})" title="Remover tarefa">❌</button>
-                        </div>
-                    `;
-                });
-            } catch (error) {
-                console.error("Erro ao carregar tarefas:", error);
-            }
-        }
+    fb.style.color = tipo === "sucesso" ? "#10b981" : "#ef4444";
 
-        // POST: Enviar nova tarefa
-        async function adicionarTarefa() {
-            const input = document.getElementById("inputTarefa");
-            const tarefaTexto = input.value.trim();
+    setTimeout(() => {
+        fb.innerText = "";
+    }, 3000);
+}
 
-            if (!tarefaTexto) {
-                mostrarFeedback("Digite algo antes de adicionar!", "erro");
-                return;
-            }
+// GET
+async function carregarTarefas() {
+    const response = await fetch("/tarefas");
+    const tarefas = await response.json();
 
-            try {
-                const response = await fetch("/tarefas", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ tarefa: tarefaTexto })
-                });
+    const lista = document.getElementById("listaTarefas");
+    lista.innerHTML = "";
 
-                const dados = await response.json();
+    if (tarefas.length === 0) {
+        lista.innerHTML = `<div class="estado-vazio">Nenhuma tarefa cadastrada.</div>`;
+        return;
+    }
 
-                if (response.ok) {
-                    mostrarFeedback("Tarefa adicionada! ✔", "sucesso");
-                    input.value = ""; // Limpa input
-                    carregarTarefas(); // Atualiza a tela
-                } else {
-                    mostrarFeedback(dados.erro || "Erro ao adicionar", "erro");
-                }
-            } catch (error) {
-                mostrarFeedback("Erro na comunicação com o servidor", "erro");
-            }
-        }
+    tarefas.forEach((tarefa, index) => {
+        lista.innerHTML += `
+            <div class="tarefa-item">
+                <span>${index} - ${tarefa}</span>
+                <button class="btn-delete" onclick="deletarTarefa(${index})">❌</button>
+            </div>
+        `;
+    });
+}
 
-        // DELETE: Apagar tarefa [Item 1]
-        async function deletarTarefa(index) {
-            try {
-                const response = await fetch(`/tarefas/${index}`, {
-                    method: "DELETE"
-                });
+// POST
+async function adicionarTarefa() {
+    const input = document.getElementById("inputTarefa");
+    const tarefaTexto = input.value.trim();
 
-                if (response.ok) {
-                    mostrarFeedback("Tarefa removida com sucesso!", "sucesso");
-                    carregarTarefas(); // Recarrega a tela atualizada
-                } else {
-                    mostrarFeedback("Não foi possível deletar essa tarefa.", "erro");
-                }
-            } catch (error) {
-                mostrarFeedback("Erro ao tentar deletar.", "erro");
-            }
-        }
-    </script>
+    if (!tarefaTexto) {
+        mostrarFeedback("Digite algo!", "erro");
+        return;
+    }
+
+    const response = await fetch("/tarefas", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ tarefa: tarefaTexto })
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+        mostrarFeedback("Tarefa adicionada!", "sucesso");
+        input.value = "";
+        carregarTarefas();
+    } else {
+        mostrarFeedback(data.erro, "erro");
+    }
+}
+
+// DELETE
+async function deletarTarefa(index) {
+    const response = await fetch(`/tarefas/${index}`, {
+        method: "DELETE"
+    });
+
+    if (response.ok) {
+        mostrarFeedback("Tarefa removida!", "sucesso");
+        carregarTarefas();
+    } else {
+        mostrarFeedback("Erro ao remover!", "erro");
+    }
+}
+</script>
+
 </body>
 </html>
