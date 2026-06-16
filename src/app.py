@@ -1,122 +1,91 @@
-import json
+from flask import Flask, jsonify, request
 import os
 
-from motivacao import buscar_frase_motivacional
-from supabase_db import carregar_tarefas_supabase, adicionar_tarefa_supabase
+app = Flask(__name__)
 
-ARQUIVO_DADOS = "tarefas.json"
-
-
-def carregar_tarefas():
-    """Carrega tarefas do JSON local."""
-    if not os.path.exists(ARQUIVO_DADOS):
-        return []
-
-    with open(ARQUIVO_DADOS, "r", encoding="utf-8") as f:
-        return json.load(f)
+# -----------------------------
+# DADOS EM MEMÓRIA (FALLBACK)
+# -----------------------------
+tarefas = []
 
 
-def salvar_tarefas(tarefas):
-    """Salva tarefas no JSON local."""
-    with open(ARQUIVO_DADOS, "w", encoding="utf-8") as f:
-        json.dump(tarefas, f, ensure_ascii=False)
+# -----------------------------
+# ROTA PRINCIPAL
+# -----------------------------
+@app.route("/")
+def home():
+    return jsonify({
+        "status": "ok",
+        "mensagem": "🔥 Foco Diário rodando no deploy!"
+    })
 
 
-def adicionar_tarefa(tarefas, nova_tarefa):
-    """Regra de negócio: máximo de 3 tarefas."""
+# -----------------------------
+# LISTAR TAREFAS
+# -----------------------------
+@app.route("/tarefas", methods=["GET"])
+def listar_tarefas():
+    return jsonify(tarefas)
+
+
+# -----------------------------
+# ADICIONAR TAREFA
+# -----------------------------
+@app.route("/tarefas", methods=["POST"])
+def adicionar_tarefa():
+    data = request.get_json()
+
+    if not data or "tarefa" not in data:
+        return jsonify({
+            "sucesso": False,
+            "erro": "Campo 'tarefa' é obrigatório"
+        }), 400
+
+    tarefa = data["tarefa"].strip()
+
+    if not tarefa:
+        return jsonify({
+            "sucesso": False,
+            "erro": "Tarefa não pode ser vazia"
+        }), 400
+
     if len(tarefas) >= 3:
-        return False, "Erro: Limite máximo de 3 tarefas atingido!"
+        return jsonify({
+            "sucesso": False,
+            "erro": "Limite de 3 tarefas atingido"
+        }), 400
 
-    if not nova_tarefa.strip():
-        return False, "Erro: A tarefa não pode ser vazia."
+    tarefas.append(tarefa)
 
-    tarefas.append(nova_tarefa.strip())
-    return True, "Tarefa adicionada com sucesso!"
+    return jsonify({
+        "sucesso": True,
+        "mensagem": "Tarefa adicionada com sucesso!",
+        "tarefas": tarefas
+    })
 
 
-def remover_tarefa(tarefas, numero_tarefa):
-    """Remove tarefa pelo índice."""
+# -----------------------------
+# REMOVER TAREFA
+# -----------------------------
+@app.route("/tarefas/<int:index>", methods=["DELETE"])
+def remover_tarefa(index):
     try:
-        indice = numero_tarefa - 1
-
-        if indice < 0:
-            raise IndexError
-
-        removida = tarefas.pop(indice)
-
-        return True, f"Parabéns! Tarefa '{removida}' concluída/removida."
-
-    except (IndexError, ValueError):
-        return False, "Erro: Número de tarefa inválido."
-
-
-def iniciar_cli():
-    """Interface de Linha de Comando."""
-
-    try:
-        dados = carregar_tarefas_supabase()
-        tarefas = [t["titulo"] for t in dados]
-    except Exception:
-        tarefas = carregar_tarefas()
-
-    print(buscar_frase_motivacional())
-
-    while True:
-        print("\n--- 🎯 FOCO DIÁRIO: Organizador de Estudos ---")
-        print("1. Adicionar Tarefa de Estudo (Máx: 3)")
-        print("2. Listar Tarefas")
-        print("3. Concluir/Remover Tarefa")
-        print("4. Sair")
-
-        escolha = input("Escolha uma opção: ")
-
-        if escolha == "1":
-            nova = input(
-                "Digite a tarefa (ex: 'Ler capítulo 2 de História'): "
-            )
-
-            sucesso, msg = adicionar_tarefa(tarefas, nova)
-
-            print(f"\n> {msg}")
-
-            if sucesso:
-                try:
-                    adicionar_tarefa_supabase(nova)
-                except Exception:
-                    salvar_tarefas(tarefas)
-
-        elif escolha == "2":
-            print("\n📋 Suas Tarefas de Hoje:")
-
-            if not tarefas:
-                print(" Nenhuma tarefa cadastrada.")
-
-            for i, tarefa in enumerate(tarefas, start=1):
-                print(f" {i}. {tarefa}")
-
-        elif escolha == "3":
-            try:
-                num = int(
-                    input("Digite o número da tarefa concluída: ")
-                )
-
-                sucesso, msg = remover_tarefa(tarefas, num)
-
-                print(f"\n> {msg}")
-
-                if sucesso:
-                    salvar_tarefas(tarefas)
-
-            except ValueError:
-                print("\n> Erro: Digite um número válido.")
-
-        elif escolha == "4":
-            print("\nAté logo! Mantenha o foco.")
-            break
-
-        else:
-            print("\n> Opção inválida. Tente novamente.")
+        removida = tarefas.pop(index)
+        return jsonify({
+            "sucesso": True,
+            "removida": removida,
+            "tarefas": tarefas
+        })
+    except IndexError:
+        return jsonify({
+            "sucesso": False,
+            "erro": "Índice inválido"
+        }), 400
 
 
+# -----------------------------
+# START LOCAL (IGNORADO NO RENDER)
+# -----------------------------
 if __name__ == "__main__":
-    iniciar_cli()
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)
