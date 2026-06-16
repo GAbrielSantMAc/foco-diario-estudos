@@ -10,11 +10,17 @@ app = Flask(__name__)
 # -----------------------------
 # O Render vai ler essas variáveis automaticamente das configurações que você salvou lá
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
-SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
+SUPABASE_KEY = os.environ.get("SUPABASE_ANON_KEY")
 
-# Inicializa o cliente do banco de dados
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_ANON_KEY")
 
+# 👇 COLOCA AQUI (ESSA É A POSIÇÃO CERTA)
+if not SUPABASE_URL or not SUPABASE_KEY:
+    raise Exception("Variáveis do Supabase não carregaram")
+
+# depois disso cria o cliente
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # -----------------------------
 # ROTA PRINCIPAL (TESTE)
