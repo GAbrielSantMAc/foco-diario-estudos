@@ -1,4 +1,6 @@
-from flask import Flask, jsonify, request
+print("🔥 APP INICIALIZOU")
+import os
+from flask import Flask, jsonify, request, render_template
 
 app = Flask(__name__)
 
@@ -6,7 +8,6 @@ app = Flask(__name__)
 # MEMÓRIA SIMPLES (SEM BANCO)
 # -----------------------------
 tarefas = []
-
 
 # -----------------------------
 # ROTA PRINCIPAL
@@ -18,21 +19,22 @@ def home():
         "mensagem": "🔥 Foco Diário rodando no Render!"
     })
 
+# -----------------------------
+# INTERFACE WEB (HTML)
+# -----------------------------
+@app.route("/app")
+def interface():
+    return render_template("index.html")
 
 # -----------------------------
-# LISTAR TAREFAS
+# API: LISTAR TAREFAS
 # -----------------------------
 @app.route("/tarefas", methods=["GET"])
 def listar_tarefas():
     return jsonify(tarefas)
 
-@app.route("/app")
-def interface():
-    return render_template("index.html")
-
-
 # -----------------------------
-# ADICIONAR TAREFA
+# API: ADICIONAR TAREFA
 # -----------------------------
 @app.route("/tarefas", methods=["POST"])
 def adicionar_tarefa():
@@ -66,9 +68,8 @@ def adicionar_tarefa():
         "tarefas": tarefas
     })
 
-
 # -----------------------------
-# REMOVER TAREFA
+# API: REMOVER TAREFA
 # -----------------------------
 @app.route("/tarefas/<int:index>", methods=["DELETE"])
 def remover_tarefa(index):
@@ -85,17 +86,9 @@ def remover_tarefa(index):
             "erro": "Índice inválido"
         }), 400
 
-
 # -----------------------------
-# EXECUÇÃO LOCAL (IGNORADO NO RENDER)
+# EXECUÇÃO LOCAL
 # -----------------------------
 if __name__ == "__main__":
-    import os
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=True)
-    
-from flask import Flask, jsonify, request, render_template
-
-app = Flask(__name__)
-
-tarefas = []
