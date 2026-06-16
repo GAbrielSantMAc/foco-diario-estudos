@@ -1,10 +1,9 @@
 from flask import Flask, jsonify, request
-import os
 
 app = Flask(__name__)
 
 # -----------------------------
-# DADOS EM MEMÓRIA (FALLBACK)
+# MEMÓRIA SIMPLES (SEM BANCO)
 # -----------------------------
 tarefas = []
 
@@ -16,7 +15,7 @@ tarefas = []
 def home():
     return jsonify({
         "status": "ok",
-        "mensagem": "🔥 Foco Diário rodando no deploy!"
+        "mensagem": "🔥 Foco Diário rodando no Render!"
     })
 
 
@@ -26,6 +25,10 @@ def home():
 @app.route("/tarefas", methods=["GET"])
 def listar_tarefas():
     return jsonify(tarefas)
+
+@app.route("/app")
+def interface():
+    return render_template("index.html")
 
 
 # -----------------------------
@@ -84,8 +87,15 @@ def remover_tarefa(index):
 
 
 # -----------------------------
-# START LOCAL (IGNORADO NO RENDER)
+# EXECUÇÃO LOCAL (IGNORADO NO RENDER)
 # -----------------------------
 if __name__ == "__main__":
+    import os
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=True)
+    
+from flask import Flask, jsonify, request, render_template
+
+app = Flask(__name__)
+
+tarefas = []

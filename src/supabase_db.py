@@ -4,8 +4,8 @@ from supabase import create_client
 
 load_dotenv()
 
-url = os.getenv("SUPABASE_URL")
-key = os.getenv("SUPABASE_KEY")
+url = os.getenv("https://bhumdpghnebfkyowaego.supabase.co")
+key = os.getenv("sb_publishable_mkXR4hH6Dt46GGNyi2LIsw_RyXoO8jQ")
 
 supabase = create_client(url, key)
 
