@@ -1,4 +1,5 @@
 print("🔥 APP INICIALIZOU")
+
 import os
 from flask import Flask, jsonify, request, render_template
 from supabase import create_client, Client
@@ -6,35 +7,31 @@ from supabase import create_client, Client
 app = Flask(__name__)
 
 # -----------------------------
-# CONEXÃO COM O SUPABASE
+# CONEXÃO COM SUPABASE
 # -----------------------------
-# O Render vai ler essas variáveis automaticamente das configurações que você salvou lá
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_ANON_KEY")
 
-SUPABASE_URL = os.environ.get("SUPABASE_URL")
-SUPABASE_KEY = os.environ.get("SUPABASE_ANON_KEY")
-
-# 👇 COLOCA AQUI (ESSA É A POSIÇÃO CERTA)
+# segurança (evita crash silencioso no Render)
 if not SUPABASE_URL or not SUPABASE_KEY:
     raise Exception("Variáveis do Supabase não carregaram")
 
-# depois disso cria o cliente
-supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
 
 # -----------------------------
-# ROTA PRINCIPAL (TESTE)
+# ROTA PRINCIPAL
 # -----------------------------
 @app.route("/")
 def home():
     return jsonify({
         "status": "ok",
-        "mensagem": "🔥 Foco Diário conectado ao Supabase e rodando no Render!"
+        "mensagem": "🔥 Foco Diário rodando no Render + Supabase!"
     })
 
 
 # -----------------------------
-# INTERFACE WEB (HTML)
+# INTERFACE WEB
 # -----------------------------
 @app.route("/app")
 def interface():
@@ -42,26 +39,24 @@ def interface():
 
 
 # -----------------------------
-# API: LISTAR TAREFAS (SUPABASE)
+# LISTAR TAREFAS (SUPABASE)
 # -----------------------------
 @app.route("/tarefas", methods=["GET"])
 def listar_tarefas():
     try:
-        # Busca todas as tarefas da tabela "tarefas", ordenadas pelo id
         resposta = supabase.table("tarefas").select("*").order("id").execute()
-        
-        # O Supabase retorna uma lista de dicionários dentro de resposta.data
-        # Exemplo: [{"id": 12, "tarefa": "Estudar Geografia"}]
-        # Vamos extrair apenas o texto da tarefa para manter a compatibilidade com seu HTML antigo
-        lista_formatada = [item["tarefa"] for item in resposta.data]
-        
+
+        # ⚠️ MUDANÇA IMPORTANTE: "titulo"
+        lista_formatada = [item["titulo"] for item in resposta.data]
+
         return jsonify(lista_formatada)
+
     except Exception as e:
         return jsonify({"sucesso": False, "erro": str(e)}), 500
 
 
 # -----------------------------
-# API: ADICIONAR TAREFA (SUPABASE)
+# ADICIONAR TAREFA
 # -----------------------------
 @app.route("/tarefas", methods=["POST"])
 def adicionar_tarefa():
@@ -76,45 +71,47 @@ def adicionar_tarefa():
         return jsonify({"sucesso": False, "erro": "Tarefa não pode ser vazia"}), 400
 
     try:
-        # Validação do limite de 3 tarefas direto no banco de dados
+        # limite de 3 tarefas
         total_atual = supabase.table("tarefas").select("*", count="exact").execute()
+
         if total_atual.count >= 3:
             return jsonify({"sucesso": False, "erro": "Limite de 3 tarefas atingido"}), 400
 
-        # Insere a nova tarefa na tabela "tarefas" do Supabase
-        supabase.table("tarefas").insert({"tarefa": tarefa_texto}).execute()
+        # ⚠️ MUDANÇA IMPORTANTE: "titulo"
+        supabase.table("tarefas").insert({
+            "titulo": tarefa_texto,
+            "concluida": False
+        }).execute()
 
-        return jsonify({"sucesso": True, "mensagem": "Tarefa salva no Supabase com sucesso!"})
+        return jsonify({"sucesso": True, "mensagem": "Tarefa salva no Supabase!"})
+
     except Exception as e:
         return jsonify({"sucesso": False, "erro": str(e)}), 500
 
 
 # -----------------------------
-# API: REMOVER TAREFA (SUPABASE)
+# REMOVER TAREFA
 # -----------------------------
 @app.route("/tarefas/<int:index>", methods=["DELETE"])
 def remover_tarefa(index):
     try:
-        # Como o seu HTML trabalha com a posição da lista (0, 1, 2) e não com o ID do banco,
-        # precisamos primeiro descobrir qual é o ID real do item que está naquela posição
         resposta = supabase.table("tarefas").select("id").order("id").execute()
-        
+
         if index >= len(resposta.data):
             return jsonify({"sucesso": False, "erro": "Índice inválido"}), 400
-        
-        # Pega o ID real do banco correspondente à linha clicada
+
         id_real = resposta.data[index]["id"]
 
-        # Deleta a linha correspondente no Supabase
         supabase.table("tarefas").delete().eq("id", id_real).execute()
 
-        return jsonify({"sucesso": True, "mensagem": "Tarefa removida do banco!"})
+        return jsonify({"sucesso": True, "mensagem": "Tarefa removida!"})
+
     except Exception as e:
         return jsonify({"sucesso": False, "erro": str(e)}), 500
 
 
 # -----------------------------
-# EXECUÇÃO LOCAL
+# EXECUÇÃO LOCAL / RENDER
 # -----------------------------
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
